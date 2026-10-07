@@ -41,7 +41,7 @@ pub async fn bio_has(user_id: i64, code: &str) -> Result<bool, String> {
         .map_err(|e| e.to_string())?;
     let profile: Profile = res.json().await.map_err(|e| e.to_string())?;
     let text = profile.description.unwrap_or_default().replace('\u{200b}', "");
-    Ok(text.contains(code))
+    Ok(text.to_lowercase().contains(&code.to_lowercase()))
 }
 
 pub async fn group_info(id: i64) -> Result<(String, String, i64, String, String), String> {

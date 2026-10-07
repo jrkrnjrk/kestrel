@@ -1,23 +1,37 @@
-{% include "top.html" %}
-<div class="panel" style="max-width:520px">
-  <h2>Bio proof</h2>
-  <p>No password. We write a code, you paste it into the Roblox About box, and this server reads that bio back.</p>
-  {% if code == "" %}
-    <form method="post" action="/login/start">
-      <label>Username</label>
-      <input name="username" placeholder="builderman" required />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign in · Kestrel</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520&family=Outfit:wght@380;560&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/dashboard.css" />
+</head>
+<body>
+<main style="max-width:480px;margin:8vh auto;padding:20px">
+  <div class="mark"><i></i> Kestrel</div>
+  <div class="panel">
+    <h1 style="font-family:var(--serif);font-weight:520;margin:0 0 8px">Sign in</h1>
+    <p>Put the code in your Roblox About box. It is the word kestrel plus one of work, love, or hello.</p>
+    {% if code == "" %}
+      <form method="post" action="/login/start">
+        <label>Username</label>
+        <input name="username" placeholder="builderman" required />
+        <p class="err">{{ error }}</p>
+        <button class="btn primary">Get code</button>
+      </form>
+    {% else %}
+      <p><b>{{ display_name }}</b> · @{{ username }}</p>
+      <p>Paste this exact line into About, save, then check.</p>
+      <p class="mono">{{ code }}</p>
+      <p><a href="{{ profile_url }}">Open Roblox profile</a></p>
+      <form method="post" action="/login/verify">
+        <input type="hidden" name="challenge_id" value="{{ challenge_id }}" />
+        <button class="btn primary">Check bio</button>
+      </form>
       <p class="err">{{ error }}</p>
-      <button class="btn primary">Get code</button>
-    </form>
-  {% else %}
-    <p><b>{{ display_name }}</b> · @{{ username }}</p>
-    <p class="mono">{{ code }}</p>
-    <p><a href="{{ profile_url }}">Open Roblox profile</a></p>
-    <form method="post" action="/login/verify">
-      <input type="hidden" name="challenge_id" value="{{ challenge_id }}" />
-      <button class="btn primary">Check bio</button>
-    </form>
-    <p class="err">{{ error }}</p>
-  {% endif %}
-</div>
-{% include "bottom.html" %}
+    {% endif %}
+  </div>
+</main>
+</body>
+</html>

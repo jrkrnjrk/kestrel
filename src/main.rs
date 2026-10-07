@@ -3,7 +3,8 @@ mod roblox;
 mod scripts;
 
 use askama::Template;
-use axum::extract::{Form, Path};
+use axum::extract::{Form, Path, Request};
+use axum::middleware::{self, Next};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
@@ -642,7 +643,8 @@ async fn login_start(headers: HeaderMap, Form(form): Form<UserForm>) -> Response
     let group_name = name_of(&conn, gid);
     match roblox::lookup(form.username.trim().trim_start_matches('@')).await {
         Some((id, username, display_name)) => {
-            let code = format!("kestrel-{}", db::now());
+            let words = ["work", "love", "hello"];
+            let code = format!("kestrel {}", words[(db::now() as usize) % 3]);
             let challenge_id = format!("ch{}", db::now());
             conn.execute("INSERT INTO challenges (id, user_id, username, display_name, code, expires_at) VALUES (?1,?2,?3,?4,?5,?6)", params![challenge_id, id, username, display_name, code, db::now() + 900]).ok();
             render(LoginPage { title, page, viewer, group_name, authed, demo, group_options, code, display_name, username, profile_url: format!("https://www.roblox.com/users/{id}/profile"), challenge_id, error: String::new() })
@@ -767,6 +769,25 @@ async fn api_exile(headers: HeaderMap, Json(body): Json<Value>) -> Response {
     Json(json!({"ok": true})).into_response()
 }
 
+async fn require_login(request: Request, next: Next) -> Response {
+    let path = request.uri().path().to_string();
+    let open = path == "/login"
+        || path.starts_with("/login/")
+        || path == "/health"
+        || path == "/logout"
+        || path.starts_with("/apply/")
+        || path.starts_with("/api/")
+        || path.starts_with("/static");
+    if !open {
+        let headers = request.headers();
+        let conn = db::open();
+        if db::viewer(&conn, &cookie(headers, "kestrel")).is_none() {
+            return Redirect::to("/login").into_response();
+        }
+    }
+    next.run(request).await
+}
+
 #[tokio::main]
 async fn main() {
     let _ = db::open();
@@ -822,7 +843,8 @@ async fn main() {
         .route("/api/ingest/commands", get(ingest_commands))
         .route("/api/v1/rank", post(api_rank))
         .route("/api/v1/exile", post(api_exile))
-        .nest_service("/static", ServeDir::new(static_dir));
+        .nest_service("/static", ServeDir::new(static_dir))
+        .layer(middleware::from_fn(require_login));
     let port: u16 = std::env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(8080);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("Kestrel listening on {addr}");

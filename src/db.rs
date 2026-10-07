@@ -50,69 +50,26 @@ CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, group_id INTEGER, user_id
 "#;
 
 fn seed(conn: &Connection) {
-    let n: i64 = conn.query_row("SELECT COUNT(*) FROM groups", [], |r| r.get(0)).unwrap_or(0);
-    if n > 0 {
-        return;
-    }
-    conn.execute("INSERT INTO groups (id, name, description, member_count, owner_name, roles_json, open_cloud_key, demo) VALUES (900001, 'Northline Bureau', 'Sample staff bureau so the desk is full before you bind a real group.', 1840, 'northline', ?, NULL, 1)", params![r#"[{"id":10,"name":"Recruit","rank":1},{"id":20,"name":"Officer","rank":10},{"id":30,"name":"Supervisor","rank":50},{"id":40,"name":"Command","rank":100},{"id":255,"name":"Owner","rank":255}]"#]).ok();
-    let people = [
-        (101, "ira.vale", "Ira Vale", "Command", 100, "online", 412, 38, 22, 186, 14, "Command", "03-18", "job-north-1"),
-        (102, "moss.chen", "Moss Chen", "Supervisor", 50, "online", 366, 51, 19, 142, 11, "Patrol", "11-02", "job-north-1"),
-        (103, "june.park", "June Park", "Supervisor", 50, "idle", 298, 90, 11, 97, 9, "Training", "07-29", "job-north-2"),
-        (104, "theo.marc", "Theo Marc", "Officer", 10, "online", 254, 40, 16, 210, 8, "Dispatch", "01-09", "job-north-1"),
-        (105, "silo.ade", "Silo Ade", "Officer", 10, "online", 221, 33, 8, 76, 7, "Patrol", "05-14", "job-north-3"),
-        (106, "nori.beck", "Nori Beck", "Officer", 10, "offline", 188, 70, 6, 54, 6, "Patrol", "09-21", ""),
-        (107, "wren.oto", "Wren Oto", "Recruit", 1, "online", 96, 22, 14, 41, 3, "Training", "12-04", "job-north-2"),
-        (108, "cass.lin", "Cass Lin", "Recruit", 1, "idle", 74, 48, 4, 18, 2, "Training", "02-27", "job-north-2"),
-    ];
-    for p in people {
-        conn.execute("INSERT INTO people (group_id, user_id, username, display_name, role_name, role_rank, status, active_min, idle_min, typing_min, messages, sessions, last_seen, department, birthday, server_id) VALUES (900001,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,?,?)", params![p.0, p.1, p.2, p.3, p.4, p.5, p.6, p.7, p.8, p.9, p.10, p.11, p.12, p.13]).ok();
-    }
-    let chats = [
-        ("theo.marc", "all", "Unit 4 on scene, requesting a supervisor."),
-        ("moss.chen", "staff", "Copy. Ira is already en route."),
-        ("ira.vale", "staff", "Hold the scene. Do not rank anyone until the log is written."),
-        ("june.park", "training", "Recruit drill starts in ten. Wren, Cass, check in."),
-        ("wren.oto", "training", "Checked in. Typing the incident form now."),
-        ("silo.ade", "all", "Clear on the east gate."),
-    ];
-    for (i, c) in chats.iter().enumerate() {
-        conn.execute("INSERT INTO chat (group_id, user_id, username, message, channel, created_at) VALUES (900001, 0, ?, ?, ?, ?)", params![c.0, c.2, c.1, 1_700_000_000 + i as i64]).ok();
-    }
-    let logs = [
-        ("ranking", "ira.vale", "Ranked moss.chen → Supervisor"),
-        ("session", "june.park", "Claimed evening patrol"),
-        ("punishment", "ira.vale", "Warning for nori.beck: missed quota"),
-        ("chat", "game", "Chat batch · 6 lines"),
-        ("presence", "game", "Presence batch · 6 players"),
-        ("application", "wren.oto", "Submitted Officer application · pending"),
-    ];
-    for (i, l) in logs.iter().enumerate() {
-        conn.execute("INSERT INTO logs (group_id, kind, actor, message, created_at) VALUES (900001, ?, ?, ?, ?)", params![l.0, l.1, l.2, 1_700_000_100 + i as i64]).ok();
-    }
-    conn.execute_batch(r#"
-INSERT INTO events (group_id, username, event_type, data_json, created_at) VALUES (900001, 'theo.marc', 'Admin Logs', '{"command":":bring silo.ade"}', 1700000200);
-INSERT INTO events (group_id, username, event_type, data_json, created_at) VALUES (900001, 'june.park', 'Training', '{"drill":"radio check"}', 1700000300);
-INSERT INTO shifts (id, group_id, title, place_id, slots, notes, created_at) VALUES ('shift-eve', 900001, 'Evening patrol', 0, 6, 'Claim a slot before 18:00.', 1700000000);
-INSERT INTO shifts (id, group_id, title, place_id, slots, notes, created_at) VALUES ('shift-trn', 900001, 'Recruit drill', 0, 8, 'Training department only.', 1700000001);
-INSERT INTO claims (id, shift_id, group_id, username, role_name, created_at) VALUES ('c1', 'shift-eve', 900001, 'june.park', 'Supervisor', 1700000400);
-INSERT INTO forms (id, group_id, slug, name, description, quiz, pass_percent) VALUES ('form1', 900001, 'officer', 'Officer application', 'Patrol intake. Quiz mode scores the radio item.', 1, 70);
-INSERT INTO questions (id, form_id, prompt, answer) VALUES ('q1', 'form1', 'Why this bureau?', '');
-INSERT INTO questions (id, form_id, prompt, answer) VALUES ('q2', 'form1', 'Radio code for scene secure?', 'code 4');
-INSERT INTO applications (id, form_id, group_id, username, answers, score, status, created_at) VALUES ('app1', 'form1', 900001, 'wren.oto', '{"q1":"I want patrol.","q2":"code 4"}', 100, 'pending', 1700000500);
-INSERT INTO punishments (id, group_id, username, kind, reason, actor, created_at) VALUES ('pun1', 900001, 'nori.beck', 'warning', 'Missed weekly active quota', 'ira.vale', 1700000600);
-INSERT INTO timeoff (id, group_id, username, starts_on, ends_on, reason, status, created_at) VALUES ('off1', 900001, 'cass.lin', '2026-10-12', '2026-10-14', 'Travel', 'pending', 1700000700);
-INSERT INTO docs (id, group_id, title, body, department) VALUES ('doc1', 900001, 'Scene handbook', 'Do not rank from the game admin. Write the log, then rank from this desk.', 'All');
-INSERT INTO docs (id, group_id, title, body, department) VALUES ('doc2', 900001, 'Training drill', 'Radio check, then a supervised stop. Claim the drill session before you start.', 'Training');
-INSERT INTO goals (group_id, role_name, weekly_minutes) VALUES (900001, 'Officer', 180);
-INSERT INTO goals (group_id, role_name, weekly_minutes) VALUES (900001, 'Supervisor', 240);
-INSERT INTO webhooks (id, group_id, name, url, events) VALUES ('wh1', 900001, 'Staff Discord', 'https://discord.com/api/webhooks/example', 'rank.changed,chat.message,punishment.issued');
-INSERT INTO keys (id, group_id, name, token) VALUES ('key1', 900001, 'game', 'kst_sample_replace_me');
-INSERT INTO tickets (id, group_id, username, message, status, reply, created_at) VALUES ('t1', 900001, 'silo.ade', 'Player refusing orders at the gate.', 'open', '', 1700000800);
-INSERT INTO settings (group_id, brand, accent, idle_seconds, shout) VALUES (900001, 'Northline Bureau', '#e7ff6a', 90, 'Evening patrol is live.');
-INSERT INTO teams (id, group_id, name, rank_min) VALUES ('tm1', 900001, 'Command', 100);
-INSERT INTO teams (id, group_id, name, rank_min) VALUES ('tm2', 900001, 'Patrol', 10);
-"#).ok();
+    conn.execute_batch(
+        "DELETE FROM people WHERE group_id=900001;
+         DELETE FROM chat WHERE group_id=900001;
+         DELETE FROM logs WHERE group_id=900001;
+         DELETE FROM events WHERE group_id=900001;
+         DELETE FROM shifts WHERE group_id=900001;
+         DELETE FROM claims WHERE group_id=900001;
+         DELETE FROM forms WHERE group_id=900001;
+         DELETE FROM applications WHERE group_id=900001;
+         DELETE FROM punishments WHERE group_id=900001;
+         DELETE FROM timeoff WHERE group_id=900001;
+         DELETE FROM docs WHERE group_id=900001;
+         DELETE FROM goals WHERE group_id=900001;
+         DELETE FROM webhooks WHERE group_id=900001;
+         DELETE FROM keys WHERE group_id=900001;
+         DELETE FROM tickets WHERE group_id=900001;
+         DELETE FROM settings WHERE group_id=900001;
+         DELETE FROM teams WHERE group_id=900001;
+         DELETE FROM groups WHERE id=900001;",
+    ).ok();
 }
 
 pub fn now() -> i64 {
