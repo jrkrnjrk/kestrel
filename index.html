@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kestrel — group operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Outfit:wght@380;460;560&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg:#0e0f0c; --surface:#1b1c17; --line:#31342b; --text:#f3f0e6; --muted:#9b978c; --faint:#6e6b62; --accent:#d6f25c; --danger:#ff6244; --ok:#8ed9b4; --warn:#f0b45a; --info:#8eb6d6; --serif:"Fraunces",Georgia,serif; --sans:"Outfit",sans-serif; }
+  * { box-sizing:border-box; } html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); font-weight:380; }
+  button,input,select,textarea { font:inherit; color:inherit; } button { cursor:pointer; } a { color:var(--accent); } .hidden { display:none !important; }
+  #login { min-height:100%; display:grid; grid-template-columns:1.1fr .9fr; }
+  .login-side { padding:48px 56px; display:flex; flex-direction:column; justify-content:space-between; background:radial-gradient(900px 500px at 10% 10%, rgba(214,242,92,.08), transparent 50%), linear-gradient(160deg,#14160f,#0c0d0a 60%); border-right:1px solid var(--line); }
+  .mark { display:flex; align-items:center; gap:10px; letter-spacing:.18em; font-size:12px; text-transform:uppercase; color:var(--muted); }
+  .mark i { width:14px; height:14px; background:var(--accent); display:block; transform:rotate(45deg); }
+  .login-side h1 { font-family:var(--serif); font-weight:520; font-size:clamp(46px,6vw,76px); line-height:.92; margin:28px 0 16px; }
+  .lede,.hint { color:var(--muted); line-height:1.45; } .login-card { display:flex; align-items:center; justify-content:center; padding:32px; }
+  .card,.modal { width:min(480px,100%); background:var(--surface); border:1px solid var(--line); padding:28px; }
+  h2 { font-family:var(--serif); font-weight:520; } label { display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin:8px 0; }
+  input,select,textarea { width:100%; background:var(--bg); border:1px solid var(--line); padding:11px; outline:none; } textarea { min-height:90px; }
+  input:focus,select:focus,textarea:focus { border-color:var(--accent); } .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { border:1px solid var(--line); background:#22241d; padding:10px 12px; color:var(--text); } .btn.primary { background:var(--accent); color:#172000; border-color:var(--accent); font-weight:560; }
+  .btn.danger { color:var(--danger); } .btn.ghost { background:transparent; } .err { color:var(--danger); min-height:18px; }
+  .code-box { margin:16px 0; padding:16px; background:var(--bg); border:1px dashed #4d5338; font-family:ui-monospace,monospace; font-size:22px; display:flex; justify-content:space-between; gap:8px; }
+  .who { display:flex; gap:12px; align-items:center; } .who img,.me img,.person img { background:#000; object-fit:cover; } .who img { width:42px; height:42px; }
+  #app { min-height:100%; display:grid; grid-template-columns:232px 1fr; } aside { border-right:1px solid var(--line); background:#12130f; padding:18px 12px; display:flex; flex-direction:column; }
+  nav { display:flex; flex-direction:column; gap:2px; overflow:auto; } nav button { text-align:left; background:transparent; border:0; color:var(--muted); padding:8px 10px; }
+  nav button.on, nav button:hover { background:var(--surface); color:var(--text); } nav .sec { margin:12px 10px 4px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  .me { margin-top:auto; display:flex; gap:8px; align-items:center; padding-top:10px; border-top:1px solid var(--line); } .me img { width:32px; height:32px; } .me small { color:var(--faint); display:block; }
+  header.top { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:16px 22px; border-bottom:1px solid var(--line); }
+  header.top h2 { margin:0; font-size:28px; } .content { padding:22px; } .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat,.panel,.gcard { background:var(--surface); border:1px solid var(--line); padding:14px 16px; } .stat span,.panel h3 { color:var(--faint); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+  .stat strong { display:block; margin-top:6px; font-family:var(--serif); font-size:30px; font-weight:520; } .grid-2,.split { display:grid; grid-template-columns:1.3fr .7fr; gap:12px; margin-top:12px; } .split { grid-template-columns:1fr 1fr; }
+  table { width:100%; border-collapse:collapse; font-size:14px; } th { text-align:left; color:var(--faint); font-size:11px; letter-spacing:.08em; text-transform:uppercase; padding:8px; border-bottom:1px solid var(--line); }
+  td { padding:9px 8px; border-bottom:1px solid #26281f; vertical-align:middle; } .pill { display:inline-flex; gap:6px; padding:3px 8px; border:1px solid var(--line); font-size:12px; color:var(--muted); }
+  .pill.on { color:var(--ok); } .pill.idle { color:var(--warn); } .person { display:flex; gap:8px; align-items:center; } .person img { width:28px; height:28px; }
+  .bars { display:flex; height:8px; width:110px; background:#10110e; } .bars i { display:block; height:100%; } .bars .a { background:var(--accent); } .bars .i { background:var(--warn); } .bars .t { background:var(--info); }
+  .toolbar { display:flex; gap:8px; margin-bottom:12px; align-items:center; } .toolbar input,.toolbar select { max-width:260px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; } .gcard h3 { margin:0; font-family:var(--serif); font-size:22px; }
+  .logline,.chatline { display:grid; gap:10px; padding:9px 0; border-bottom:1px solid #26281f; font-size:14px; } .logline { grid-template-columns:92px 100px 1fr; } .chatline { grid-template-columns:140px 1fr 90px; }
+  .kind { color:var(--accent); font-size:12px; letter-spacing:.06em; text-transform:uppercase; } .mono,pre.doc { font-family:ui-monospace,monospace; font-size:12px; }
+  pre.doc { background:#10110e; border:1px solid var(--line); padding:12px; overflow:auto; white-space:pre-wrap; max-height:420px; }
+  .modal-back,.drawer-back { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:20; }
+  .drawer-back { justify-content:flex-end; } .drawer { width:min(440px,100%); height:100%; background:#14150f; border-left:1px solid var(--line); padding:22px; overflow:auto; }
+  .toast { position:fixed; bottom:16px; right:16px; background:var(--accent); color:#172000; padding:12px 14px; z-index:30; font-weight:560; }
+  @media (max-width:980px) { #login,#app,.grid-2,.stats,.split { grid-template-columns:1fr; } .login-side,aside { display:none; } #app { display:block; } .mobile-nav { display:flex !important; } }
+  .mobile-nav { display:none; gap:6px; overflow:auto; padding:8px 12px; border-bottom:1px solid var(--line); }
+</style>
+</head>
+<body>
+<section id="login">
+  <div class="login-side">
+    <div>
+      <div class="mark"><i></i> Kestrel</div>
+      <h1>Prove the profile, then run the group.</h1>
+      <p class="lede">No password. A one-time code goes in your Roblox About box. The server reads that bio and only then opens the desk. Activity, sessions, applications, punishments, ranking, and the game scripts live here.</p>
+    </div>
+    <p class="hint">Scripts are generated inside the desk with this host and your key already filled in.</p>
+  </div>
+  <div class="login-card">
+    <form class="card" id="login-form">
+      <h2 id="login-title">Sign in</h2>
+      <p class="hint" id="login-sub">Roblox username.</p>
+      <div id="step-user"><label>Username</label><input id="username" placeholder="builderman" /><div class="row" style="margin-top:14px"><button class="btn primary" id="start-btn">Get code</button></div></div>
+      <div id="step-code" class="hidden">
+        <div class="who"><img id="avatar" alt="" /><div><b id="who-name"></b><br /><span class="hint" id="who-user"></span></div></div>
+        <p class="hint">Paste this into About, save, then verify. Expires in 15 minutes.</p>
+        <div class="code-box"><span id="code"></span><button class="btn" type="button" id="copy-code">Copy</button></div>
+        <a id="profile-link" target="_blank" rel="noreferrer">Open Roblox profile</a>
+        <div class="row" style="margin-top:16px"><button class="btn primary" type="button" id="verify-btn">Check bio</button><button class="btn ghost" type="button" id="back-btn">Back</button></div>
+      </div>
+      <p class="err" id="login-err"></p>
+    </form>
+  </div>
+</section>
+<section id="app" class="hidden">
+  <aside>
+    <div class="mark"><i></i> Kestrel</div>
+    <nav id="nav">
+      <div class="sec">Operate</div>
+      <button data-view="overview" class="on">Overview</button>
+      <button data-view="groups">Groups</button>
+      <button data-view="people">People</button>
+      <button data-view="activity">Activity</button>
+      <button data-view="live">Live desk</button>
+      <div class="sec">Record</div>
+      <button data-view="chat">Chat logs</button>
+      <button data-view="logs">All logs</button>
+      <button data-view="events">Events</button>
+      <button data-view="sessions">Sessions</button>
+      <div class="sec">HR</div>
+      <button data-view="apps">Applications</button>
+      <button data-view="punish">Punishments</button>
+      <button data-view="timeoff">Time off</button>
+      <button data-view="docs">Knowledge</button>
+      <button data-view="board">Leaderboard</button>
+      <div class="sec">Integrate</div>
+      <button data-view="rank">Ranking API</button>
+      <button data-view="hooks">Webhooks</button>
+      <button data-view="scripts">Scripts</button>
+      <button data-view="settings">Settings</button>
+    </nav>
+    <div class="me"><img id="me-avatar" alt="" /><div><b id="me-name"></b><small id="me-user"></small></div><button class="btn ghost" id="logout">Out</button></div>
+  </aside>
+  <main>
+    <div class="mobile-nav" id="mobile-nav"></div>
+    <header class="top"><div><div class="hint" id="crumb">Workspace</div><h2 id="title">Overview</h2></div><div class="row"><select id="group-switch"></select><button class="btn" id="add-group-btn">Add group</button></div></header>
+    <div class="content" id="view"></div>
+  </main>
+</section>
+<div id="modal-root"></div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const state = { token: localStorage.getItem("kestrel.token") || "", me: null, groups: [], groupId: Number(localStorage.getItem("kestrel.group") || 0), view: "overview", challenge: null };
+const titles = { overview:"Overview", groups:"Groups", people:"People", activity:"Activity", live:"Live desk", chat:"Chat logs", logs:"All logs", events:"Events", sessions:"Sessions", apps:"Applications", punish:"Punishments", timeoff:"Time off", docs:"Knowledge", board:"Leaderboard", rank:"Ranking API", hooks:"Webhooks", scripts:"Scripts", settings:"Settings" };
+function toast(msg) { const el = $("#toast"); el.textContent = msg; el.classList.remove("hidden"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.add("hidden"), 2600); }
+async function api(path, opts={}) {
+  const headers = { ...(opts.headers||{}) };
+  if (state.token) headers.Authorization = "Bearer " + state.token;
+  if (opts.body) headers["Content-Type"] = "application/json";
+  const res = await fetch(path, { ...opts, headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  const type = res.headers.get("content-type") || "";
+  const data = type.includes("json") ? await res.json().catch(() => ({})) : await res.text();
+  if (!res.ok) throw new Error((data && data.error) || res.statusText);
+  return data;
+}
+const avatar = id => `https://www.roblox.com/headshot-thumbnail/image?userId=${id}&width=150&height=150&format=png`;
+function ago(ts) { if (!ts) return "—"; const n = typeof ts === "number" ? ts*1000 : Date.parse(ts); if (!n) return String(ts); const s = Math.max(0,(Date.now()-n)/1000); if (s<60) return "just now"; if (s<3600) return Math.floor(s/60)+"m ago"; if (s<86400) return Math.floor(s/3600)+"h ago"; return Math.floor(s/86400)+"d ago"; }
+const mins = n => (n||0) < 60 ? (n||0)+"m" : Math.floor(n/60)+"h "+(n%60)+"m";
+const esc = s => String(s??"").replace(/[&<>"]/g, c => ({"&":"&","<":"<",">":">",'"':"""}[c]));
+const group = () => state.groups.find(g => g.id === state.groupId) || state.groups[0];
+function showLogin() { $("#login").classList.remove("hidden"); $("#app").classList.add("hidden"); }
+function showApp() { $("#login").classList.add("hidden"); $("#app").classList.remove("hidden"); $("#me-name").textContent = state.me.displayName; $("#me-user").textContent = "@"+state.me.username; $("#me-avatar").src = avatar(state.me.userId); render(); }
+function renderNav() {
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.view === state.view));
+  const m = $("#mobile-nav");
+  m.innerHTML = Object.keys(titles).map(v => `<button class="btn ${v===state.view?"primary":""}" data-view="${v}">${titles[v]}</button>`).join("");
+  m.querySelectorAll("button").forEach(b => b.onclick = () => { state.view = b.dataset.view; render(); });
+}
+function renderSwitch() {
+  const sel = $("#group-switch");
+  sel.innerHTML = state.groups.length ? state.groups.map(g => `<option value="${g.id}">${esc(g.name)}</option>`).join("") : `<option>No group yet</option>`;
+  if (state.groupId) sel.value = String(state.groupId);
+  if (!state.groupId && state.groups[0]) state.groupId = state.groups[0].id;
+}
+function needGroup() { if (group()) return true; $("#view").innerHTML = `<div class="panel"><p class="hint">Add a Roblox group id first.</p><button class="btn primary" id="empty-add">Add group</button></div>`; $("#empty-add").onclick = openAddGroup; return false; }
+function roleSelect(g) { return `<select id="role">${(g.roles||[]).map(r => `<option value="${r.id}">${esc(r.name)} · ${r.rank}</option>`).join("")}</select>`; }
+async function render() {
+  renderNav(); renderSwitch();
+  $("#title").textContent = titles[state.view]; $("#crumb").textContent = group() ? group().name : "Workspace";
+  $("#view").innerHTML = `<p class="hint">Loading…</p>`;
+  try {
+    const fn = { overview:viewOverview, groups:viewGroups, people:viewPeople, activity:viewActivity, live:viewLive, chat:viewChat, logs:viewLogs, events:viewEvents, sessions:viewSessions, apps:viewApps, punish:viewPunish, timeoff:viewTimeoff, docs:viewDocs, board:viewBoard, rank:viewRank, hooks:viewHooks, scripts:viewScripts, settings:viewSettings }[state.view];
+    await fn();
+  } catch (err) { $("#view").innerHTML = `<p class="err">${esc(err.message)}</p>`; }
+}
+async function viewOverview() {
+  if (!needGroup()) return; const g = group();
+  const data = await api("/api/groups/"+g.id+"/overview"); const logs = await api("/api/groups/"+g.id+"/logs");
+  $("#view").innerHTML = `<div class="stats">
+    <div class="stat"><span>In game</span><strong>${data.online}</strong><em class="hint">${data.tracked} tracked</em></div>
+    <div class="stat"><span>Active</span><strong>${mins(data.activeMin)}</strong><em class="hint">idle ${mins(data.idleMin)}</em></div>
+    <div class="stat"><span>Typing</span><strong>${mins(data.typingMin)}</strong><em class="hint">${data.messages} messages</em></div>
+    <div class="stat"><span>Queue</span><strong>${data.openTickets}</strong><em class="hint">${data.pendingApps} apps · ${data.pendingOff} time off</em></div>
+  </div><div class="grid-2"><div class="panel"><h3>Latest</h3>${logs.logs.slice(0,8).map(l => `<div class="logline"><time>${ago(l.createdAt)}</time><span class="kind">${esc(l.kind)}</span><span>${esc(l.message)}</span></div>`).join("") || `<p class="hint">Empty. Install the scripts from the Scripts page.</p>`}</div>
+  <div class="panel"><h3>${esc(g.name)}</h3><p class="hint">${esc(g.description||"")}</p><p>${(g.memberCount||0).toLocaleString()} members · @${esc(g.ownerName||"—")}</p><span class="pill ${g.hasOpenCloud?"on":""}">${g.hasOpenCloud?"Open Cloud linked":"Open Cloud not set"}</span></div></div>`;
+}
+async function viewGroups() {
+  $("#view").innerHTML = `<div class="cards">${state.groups.map(g => `<article class="gcard"><h3>${esc(g.name)}</h3><p class="hint">${esc((g.description||"").slice(0,120))}</p><div class="hint">${(g.memberCount||0).toLocaleString()} members · ${(g.roles||[]).length} roles</div><div class="row"><button class="btn" data-open="${g.id}">Open</button><button class="btn" data-refresh="${g.id}">Refresh</button><button class="btn danger" data-del="${g.id}">Remove</button></div></article>`).join("") || `<div class="panel">No groups.</div>`}</div>`;
+  $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { state.groupId = Number(b.dataset.open); localStorage.setItem("kestrel.group", state.groupId); state.view = "people"; render(); });
+  $("#view").querySelectorAll("[data-refresh]").forEach(b => b.onclick = async () => { await api("/api/groups/"+b.dataset.refresh+"/refresh", {method:"POST", body:{}}); toast("Refreshed"); await loadGroups(); render(); });
+  $("#view").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { await api("/api/groups/"+b.dataset.del, {method:"DELETE"}); await loadGroups(); render(); });
+}
+async function viewPeople() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/people");
+  $("#view").innerHTML = `<div class="toolbar"><input id="pq" placeholder="Filter" /><button class="btn" id="export-csv">Export CSV</button></div>
+  <div class="panel"><table><thead><tr><th>Person</th><th>Rank</th><th>Dept</th><th>Status</th><th>Active</th><th>Chat</th><th>Seen</th><th></th></tr></thead><tbody>
+  ${data.people.map(p => `<tr><td><div class="person"><img src="${avatar(p.userId)}" alt=""/><div><b>${esc(p.displayName||p.username)}</b><br><span class="hint">@${esc(p.username)}</span></div></div></td><td>${esc(p.roleName||"—")}</td><td>${esc(p.department||"—")}</td><td><span class="pill ${p.status==="online"?"on":p.status==="idle"?"idle":""}">${esc(p.status||"offline")}</span></td><td>${mins(p.activeMin)}</td><td>${p.messages||0}</td><td>${ago(p.lastSeen)}</td><td><button class="btn" data-id="${p.userId}" data-name="${esc(p.username)}">Record</button></td></tr>`).join("") || `<tr><td colspan="8">Nobody yet. The game script fills this.</td></tr>`}
+  </tbody></table></div>`;
+  $("#pq").oninput = () => { const q = $("#pq").value.toLowerCase(); $("#view").querySelectorAll("tbody tr").forEach(tr => tr.style.display = tr.innerText.toLowerCase().includes(q) ? "" : "none"); };
+  $("#export-csv").onclick = async () => { const text = await api("/api/groups/"+g.id+"/export"); const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type:"text/csv"})); a.download = "kestrel-"+g.id+".csv"; a.click(); };
+  $("#view").querySelectorAll("[data-id]").forEach(b => b.onclick = () => openPerson(b.dataset.id, b.dataset.name));
+}
+function openPerson(userId, username) {
+  const g = group();
+  $("#modal-root").innerHTML = `<div class="drawer-back"><div class="drawer"><h2>@${esc(username)}</h2><p class="hint">${userId}</p><label>Note</label><textarea id="note"></textarea><label>Birthday MM-DD</label><input id="bday" placeholder="04-12" /><label>Department</label><input id="dept" /><div class="row"><button class="btn" id="save-note">Save note</button><button class="btn" id="save-meta">Save profile</button></div><h3>Rank</h3>${roleSelect(g)}<div class="row"><button class="btn primary" id="do-rank">Set rank</button><button class="btn danger" id="do-exile">Exile</button></div><h3>Punishment</h3><select id="pkind"><option>warning</option><option>suspension</option><option>termination</option><option>ban</option></select><input id="preason" placeholder="Reason" /><div class="row"><button class="btn danger" id="do-pun">Issue</button></div><div id="prec"></div><button class="btn" id="close">Close</button></div></div>`;
+  $("#close").onclick = () => $("#modal-root").innerHTML = "";
+  api(`/api/groups/${g.id}/people/${userId}`).then(data => { $("#prec").innerHTML = (data.notes||[]).map(n => `<p class="hint">${esc(n.body)}</p>`).join("") + (data.punishments||[]).map(p => `<p>${esc(p.kind)} · ${esc(p.reason)}</p>`).join(""); if (data.person) { $("#bday").value = data.person.birthday||""; $("#dept").value = data.person.department||""; } });
+  $("#save-note").onclick = async () => { await api(`/api/groups/${g.id}/notes`, {method:"POST", body:{userId:Number(userId), body:$("#note").value}}); toast("Note saved"); };
+  $("#save-meta").onclick = async () => { await api(`/api/groups/${g.id}/birthday`, {method:"POST", body:{userId:Number(userId), birthday:$("#bday").value, department:$("#dept").value}}); toast("Profile saved"); };
+  $("#do-rank").onclick = async () => { const out = await api(`/api/groups/${g.id}/rank`, {method:"POST", body:{userId:Number(userId), roleId:Number($("#role").value), username}}); toast(out.note || "Ranked"); };
+  $("#do-exile").onclick = async () => { await api(`/api/groups/${g.id}/exile`, {method:"POST", body:{userId:Number(userId), username}}); toast("Exile recorded"); };
+  $("#do-pun").onclick = async () => { await api(`/api/groups/${g.id}/punishments`, {method:"POST", body:{userId:Number(userId), username, kind:$("#pkind").value, reason:$("#preason").value, roleId: $("#pkind").value==="termination" ? Number($("#role").value) : 0}}); toast("Punishment issued"); };
+}
+async function viewActivity() {
+  if (!needGroup()) return; const g = group(); const [people, goals] = await Promise.all([api("/api/groups/"+g.id+"/people"), api("/api/groups/"+g.id+"/goals")]);
+  const goalFor = name => (goals.goals.find(x => x.role_name === name) || goals.goals[0] || {weekly_minutes:60});
+  $("#view").innerHTML = `<div class="panel"><h3>Weekly distribution</h3><p class="hint">Quota is active minutes. Green means they cleared the goal.</p><div class="row"><input id="grole" placeholder="Role name" /><input id="gmin" type="number" placeholder="Weekly minutes" /><input id="gsess" type="number" placeholder="Sessions" /><button class="btn primary" id="save-goal">Save goal</button></div>
+  <table><thead><tr><th>Person</th><th>Mix</th><th>Active</th><th>Idle</th><th>Typing</th><th>Quota</th></tr></thead><tbody>
+  ${people.people.map(p => { const goal = goalFor(p.roleName).weekly_minutes || 60; const total = (p.activeMin||0)+(p.idleMin||0)+(p.typingMin||0)||1; return `<tr><td>@${esc(p.username)}</td><td><div class="bars"><i class="a" style="width:${(p.activeMin||0)/total*100}%"></i><i class="i" style="width:${(p.idleMin||0)/total*100}%"></i><i class="t" style="width:${(p.typingMin||0)/total*100}%"></i></div></td><td>${mins(p.activeMin)}</td><td>${mins(p.idleMin)}</td><td>${mins(p.typingMin)}</td><td><span class="pill ${p.activeMin>=goal?"on":""}">${p.activeMin||0}/${goal}m</span></td></tr>`; }).join("") || `<tr><td colspan="6">No activity yet.</td></tr>`}
+  </tbody></table></div>`;
+  $("#save-goal").onclick = async () => { await api(`/api/groups/${g.id}/goals`, {method:"POST", body:{roleName:$("#grole").value||"Staff", weeklyMinutes:Number($("#gmin").value||60), weeklySessions:Number($("#gsess").value||1)}}); toast("Goal saved"); render(); };
+}
+async function viewLive() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/people");
+  const online = data.people.filter(p => p.status === "online" || p.status === "idle");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>In game now</h3>${online.map(p => `<div class="logline"><span>@${esc(p.username)}</span><span class="kind">${esc(p.status)}</span><span>${esc(p.serverId||"")} <button class="btn" data-notify="${p.userId}">Notify</button> <button class="btn" data-kick="${p.userId}">Kick</button> <button class="btn danger" data-ban="${p.userId}">Ban</button></span></div>`).join("") || `<p class="hint">No one online. The loader polls commands every 8 seconds.</p>`}</div>
+  <div class="panel"><h3>Shout</h3><textarea id="shout" placeholder="Group shout"></textarea><button class="btn primary" id="post-shout">Post shout</button><p class="hint">Logged and webhooked. Rank changes on Roblox still need the Open Cloud key.</p></div></div>`;
+  const send = (kind, id) => api(`/api/groups/${g.id}/commands`, {method:"POST", body:{kind, userId:Number(id), reason:"Staff action", message:"Staff notice"}}).then(() => toast(kind+" queued"));
+  $("#view").querySelectorAll("[data-notify]").forEach(b => b.onclick = () => send("notify", b.dataset.notify));
+  $("#view").querySelectorAll("[data-kick]").forEach(b => b.onclick = () => send("kick", b.dataset.kick));
+  $("#view").querySelectorAll("[data-ban]").forEach(b => b.onclick = () => send("ban", b.dataset.ban));
+  $("#post-shout").onclick = async () => { await api(`/api/groups/${g.id}/shout`, {method:"POST", body:{message:$("#shout").value}}); toast("Shout saved"); };
+}
+async function viewChat() {
+  if (!needGroup()) return; const data = await api("/api/groups/"+group().id+"/chat");
+  $("#view").innerHTML = `<div class="toolbar"><input id="cq" placeholder="Search chat" /></div><div class="panel">${data.chat.map(c => `<div class="chatline"><div><b>@${esc(c.username)}</b><br><span class="hint">${esc(c.channel)}</span></div><div>${esc(c.message)}</div><time class="hint">${ago(c.createdAt)}</time></div>`).join("") || `<p class="hint">No chat yet.</p>`}</div>`;
+  $("#cq").oninput = () => { const q = $("#cq").value.toLowerCase(); $("#view").querySelectorAll(".chatline").forEach(el => el.style.display = el.innerText.toLowerCase().includes(q)?"":"none"); };
+}
+async function viewLogs() {
+  if (!needGroup()) return; const data = await api("/api/groups/"+group().id+"/logs");
+  const kinds = ["all", ...new Set(data.logs.map(l => l.kind))];
+  $("#view").innerHTML = `<div class="toolbar">${kinds.map(k => `<button class="btn" data-k="${k}">${k}</button>`).join("")}</div><div class="panel" id="logbox">${data.logs.map(l => `<div class="logline" data-kind="${esc(l.kind)}"><time>${ago(l.createdAt)}</time><span class="kind">${esc(l.kind)}</span><span><b>${esc(l.actor)}</b> · ${esc(l.message)}</span></div>`).join("")}</div><div class="panel" style="margin-top:12px"><h3>Webhook deliveries</h3>${data.deliveries.map(d => `<div class="logline"><time>${ago(d.created_at)}</time><span class="kind">${d.status}</span><span>${esc(d.event)} ${esc(d.detail||"")}</span></div>`).join("") || `<p class="hint">None.</p>`}</div>`;
+  $("#view").querySelectorAll("[data-k]").forEach(b => b.onclick = () => $("#logbox").querySelectorAll(".logline").forEach(el => el.style.display = b.dataset.k==="all" || el.dataset.kind===b.dataset.k ? "" : "none"));
+}
+async function viewEvents() {
+  if (!needGroup()) return; const data = await api("/api/groups/"+group().id+"/events");
+  $("#view").innerHTML = `<div class="panel">${data.events.map(e => `<div class="logline"><time>${ago(e.created_at)}</time><span class="kind">${esc(e.event_type)}</span><span>@${esc(e.username)} · ${esc(e.data_json)}</span></div>`).join("") || `<p class="hint">No events. Other scripts can call _G.Kestrel.track(player, "Admin Logs", {command=":kick"}).</p>`}</div>`;
+}
+async function viewSessions() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/shifts");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>Schedule</h3><input id="stitle" placeholder="Title" /><input id="splace" placeholder="Place id" /><input id="sslots" type="number" placeholder="Slots" /><button class="btn primary" id="add-shift">Add session</button>
+  ${data.shifts.map(s => `<div class="logline"><span>${esc(s.title)}</span><span class="kind">${s.slots} slots</span><span>${ago(s.starts_at)} · <button class="btn" data-claim="${s.id}">Claim</button></span></div>`).join("")}</div>
+  <div class="panel"><h3>Claims</h3>${data.claims.map(c => `<div class="logline"><span>@${esc(c.username)}</span><span class="kind">${esc(c.role_name)}</span><span>${ago(c.created_at)}</span></div>`).join("") || `<p class="hint">None.</p>`}</div></div>`;
+  $("#add-shift").onclick = async () => { await api(`/api/groups/${g.id}/shifts`, {method:"POST", body:{title:$("#stitle").value, placeId:Number($("#splace").value||0), slots:Number($("#sslots").value||8)}}); toast("Scheduled"); render(); };
+  $("#view").querySelectorAll("[data-claim]").forEach(b => b.onclick = async () => { await api(`/api/groups/${g.id}/claims`, {method:"POST", body:{shiftId:b.dataset.claim, userId:state.me.userId, username:state.me.username, roleName:"Staff"}}); toast("Claimed"); render(); });
+}
+async function viewApps() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/forms");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>New application</h3><input id="fname" placeholder="Name" /><input id="fslug" placeholder="public slug" /><textarea id="fdesc" placeholder="Description"></textarea><label><input type="checkbox" id="fquiz" /> Quiz mode</label><input id="fpass" type="number" placeholder="Pass percent" value="70" /><button class="btn primary" id="add-form">Create</button><div id="form-links"></div></div>
+  <div class="panel"><h3>Responses</h3>${data.applications.map(a => `<div class="logline"><span>@${esc(a.username)}</span><span class="kind">${esc(a.status)} ${a.score}%</span><span><button class="btn" data-pass="${a.id}">Pass</button> <button class="btn" data-fail="${a.id}">Fail</button></span></div>`).join("") || `<p class="hint">None.</p>`}</div></div>
+  <div class="panel" style="margin-top:12px"><h3>Questions</h3><select id="qform">${data.forms.map(f => `<option value="${f.id}">${esc(f.name)}</option>`).join("")}</select><input id="qprompt" placeholder="Prompt" /><input id="qanswer" placeholder="Correct answer, optional" /><button class="btn" id="add-q">Add question</button></div>`;
+  $("#form-links").innerHTML = data.forms.map(f => `<p><a href="/apply/${f.slug}" target="_blank">/apply/${esc(f.slug)}</a></p>`).join("");
+  $("#add-form").onclick = async () => { const out = await api(`/api/groups/${g.id}/forms`, {method:"POST", body:{name:$("#fname").value, slug:$("#fslug").value, description:$("#fdesc").value, quiz:$("#fquiz").checked, passPercent:Number($("#fpass").value||70)}}); toast("Apply link ready"); navigator.clipboard?.writeText(out.url); render(); };
+  $("#add-q").onclick = async () => { await api(`/api/groups/${g.id}/questions`, {method:"POST", body:{formId:$("#qform").value, prompt:$("#qprompt").value, answer:$("#qanswer").value, kind:"text"}}); toast("Question added"); };
+  const review = (id, status) => api(`/api/groups/${g.id}/review`, {method:"POST", body:{id, status, roleId: status==="pass" ? g.roles.find(r => r.rank>0 && r.rank<250)?.id : 0}}).then(() => { toast(status); render(); });
+  $("#view").querySelectorAll("[data-pass]").forEach(b => b.onclick = () => review(b.dataset.pass, "pass"));
+  $("#view").querySelectorAll("[data-fail]").forEach(b => b.onclick = () => review(b.dataset.fail, "fail"));
+}
+async function viewPunish() {
+  if (!needGroup()) return; const data = await api("/api/groups/"+group().id+"/punishments");
+  $("#view").innerHTML = `<div class="panel">${data.punishments.map(p => `<div class="logline"><time>${ago(p.created_at)}</time><span class="kind">${esc(p.kind)}</span><span>@${esc(p.username)} · ${esc(p.reason)} · ${esc(p.actor)}</span></div>`).join("") || `<p class="hint">No punishments. Issue them from a person record.</p>`}</div>`;
+}
+async function viewTimeoff() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/timeoff");
+  $("#view").innerHTML = `<div class="panel"><div class="row"><input id="toff-user" placeholder="Username" /><input id="toff-start" type="date" /><input id="toff-end" type="date" /><input id="toff-reason" placeholder="Reason" /><button class="btn primary" id="toff-add">Request</button></div>
+  ${data.timeoff.map(t => `<div class="logline"><span>@${esc(t.username)}</span><span class="kind">${esc(t.status)}</span><span>${esc(t.starts_on)} → ${esc(t.ends_on)} ${esc(t.reason)} <button class="btn" data-ok="${t.id}">Approve</button> <button class="btn" data-no="${t.id}">Deny</button></span></div>`).join("")}</div>`;
+  $("#toff-add").onclick = async () => { await api(`/api/groups/${g.id}/timeoff`, {method:"POST", body:{username:$("#toff-user").value, startsOn:$("#toff-start").value, endsOn:$("#toff-end").value, reason:$("#toff-reason").value}}); render(); };
+  $("#view").querySelectorAll("[data-ok]").forEach(b => b.onclick = async () => { await api(`/api/groups/${g.id}/timeoff`, {method:"POST", body:{id:b.dataset.ok, status:"approved"}}); render(); });
+  $("#view").querySelectorAll("[data-no]").forEach(b => b.onclick = async () => { await api(`/api/groups/${g.id}/timeoff`, {method:"POST", body:{id:b.dataset.no, status:"denied"}}); render(); });
+}
+async function viewDocs() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/docs");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>Page</h3><input id="dtitle" placeholder="Title" /><input id="ddept" placeholder="Department" /><textarea id="dbody"></textarea><button class="btn primary" id="dsave">Save</button></div><div class="panel">${data.docs.map(d => `<h3>${esc(d.title)}</h3><p class="hint">${esc(d.department)}</p><p>${esc(d.body)}</p>`).join("") || `<p class="hint">Handbook is empty.</p>`}</div></div>`;
+  $("#dsave").onclick = async () => { await api(`/api/groups/${g.id}/docs`, {method:"POST", body:{title:$("#dtitle").value, department:$("#ddept").value, body:$("#dbody").value}}); toast("Saved"); render(); };
+}
+async function viewBoard() {
+  if (!needGroup()) return; const data = await api("/api/groups/"+group().id+"/leaderboard");
+  $("#view").innerHTML = `<div class="panel"><h3>Top 50 by active minutes</h3><table><thead><tr><th>#</th><th>Person</th><th>Rank</th><th>Active</th><th>Sessions</th><th>Birthday</th></tr></thead><tbody>${data.leaderboard.map((p,i) => `<tr><td>${i+1}</td><td>@${esc(p.username)}</td><td>${esc(p.roleName||"—")}</td><td>${mins(p.activeMin)}</td><td>${p.sessions||0}</td><td>${esc(p.birthday||"—")}</td></tr>`).join("")}</tbody></table></div>`;
+}
+async function viewRank() {
+  if (!needGroup()) return; const g = group(); const keys = await api("/api/groups/"+g.id+"/keys");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>Open Cloud</h3><p class="hint">This key pushes rank and exile to Roblox. Desk keys below are what the game uses.</p><input id="cloud" type="password" placeholder="${g.hasOpenCloud?"Saved — paste to replace":"Open Cloud key"}" /><div class="row"><button class="btn primary" id="save-cloud">Save</button><button class="btn" id="clear-cloud">Clear</button></div><h3>Desk keys</h3><div class="row"><input id="keyname" placeholder="Name" /><button class="btn primary" id="new-key">Issue</button></div>${keys.keys.map(k => `<p class="mono">${esc(k.name)} · ${esc(k.token)}</p>`).join("")}</div>
+  <div class="panel"><h3>Manual rank</h3><input id="ruser" placeholder="User id" />${roleSelect(g)}<button class="btn primary" id="rank-go">Apply</button><pre class="doc">POST ${location.origin}/api/v1/rank
+Authorization: Bearer kst_...
+{"userId":123,"roleId":456}
+
+POST ${location.origin}/api/v1/exile
+{"userId":123}
+
+POST ${location.origin}/api/v1/shout
+{"message":"hello"}</pre></div></div>`;
+  $("#save-cloud").onclick = async () => { await api(`/api/groups/${g.id}/cloud`, {method:"POST", body:{openCloudKey:$("#cloud").value}}); toast("Saved"); await loadGroups(); };
+  $("#clear-cloud").onclick = async () => { await api(`/api/groups/${g.id}/cloud`, {method:"POST", body:{openCloudKey:""}}); await loadGroups(); render(); };
+  $("#new-key").onclick = async () => { const out = await api(`/api/groups/${g.id}/keys`, {method:"POST", body:{name:$("#keyname").value||"game"}}); navigator.clipboard?.writeText(out.token); toast("Key copied"); render(); };
+  $("#rank-go").onclick = async () => { try { const out = await api(`/api/groups/${g.id}/rank`, {method:"POST", body:{userId:Number($("#ruser").value), roleId:Number($("#role").value)}}); toast(out.note||"Ranked"); } catch(e) { toast(e.message); } };
+}
+async function viewHooks() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/webhooks");
+  const events = ["rank.changed","chat.message","presence.updated","punishment.issued","session.claimed","application.reviewed","application.submitted","ticket.opened","shout.posted","remote.command","webhook.test"];
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>New</h3><input id="hname" placeholder="Name" /><input id="hurl" placeholder="https://discord.com/api/webhooks/..." /><div class="hint">${events.map(e => `<label class="pill"><input type="checkbox" value="${e}" checked /> ${e}</label>`).join(" ")}</div><button class="btn primary" id="hadd">Add</button></div>
+  <div class="panel">${data.webhooks.map(h => `<p><b>${esc(h.name)}</b><br><span class="mono">${esc(h.url)}</span><br><button class="btn" data-test="${h.id}">Test</button> <button class="btn danger" data-del="${h.id}">Delete</button></p>`).join("") || `<p class="hint">None.</p>`}</div></div>`;
+  $("#hadd").onclick = async () => { const ev = [...document.querySelectorAll("#view input:checked")].map(i => i.value); await api(`/api/groups/${g.id}/webhooks`, {method:"POST", body:{name:$("#hname").value, url:$("#hurl").value, events:ev}}); render(); };
+  $("#view").querySelectorAll("[data-test]").forEach(b => b.onclick = async () => { await api(`/api/groups/${g.id}/webhooks/${b.dataset.test}`, {method:"POST", body:{}}); toast("Sent"); });
+  $("#view").querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { await api(`/api/groups/${g.id}/webhooks/${b.dataset.del}`, {method:"DELETE"}); render(); });
+}
+async function viewScripts() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/script");
+  const dl = (name, text) => { const blob = new Blob([text], {type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); };
+  $("#view").innerHTML = `<div class="panel"><h3>Install</h3><p class="hint">${data.hasKey ? "Key is already in the server script." : "Issue a desk key on Ranking API, then come back. The placeholder is PASTE_KEY."} Enable Allow HTTP Requests. Server script goes in ServerScriptService. Client script goes in StarterPlayerScripts. That pair tracks active, idle, typing, focus, chat, admin events, kicks, bans, and notifies.</p>
+  <div class="row"><button class="btn primary" id="copy-loader">Copy server script</button><button class="btn" id="dl-loader">Download server</button><button class="btn" id="copy-client">Copy client script</button><button class="btn" id="dl-client">Download client</button></div></div>
+  <div class="split"><div class="panel"><h3>Server</h3><pre class="doc" id="loader"></pre></div><div class="panel"><h3>Client</h3><pre class="doc" id="client"></pre></div></div>`;
+  $("#loader").textContent = data.loader; $("#client").textContent = data.client;
+  $("#copy-loader").onclick = () => { navigator.clipboard.writeText(data.loader); toast("Server script copied"); };
+  $("#copy-client").onclick = () => { navigator.clipboard.writeText(data.client); toast("Client script copied"); };
+  $("#dl-loader").onclick = () => dl("KestrelLoader.server.lua", data.loader);
+  $("#dl-client").onclick = () => dl("KestrelClient.client.lua", data.client);
+}
+async function viewSettings() {
+  if (!needGroup()) return; const g = group(); const data = await api("/api/groups/"+g.id+"/settings"); const s = data.settings;
+  const teams = await api("/api/groups/"+g.id+"/teams");
+  $("#view").innerHTML = `<div class="split"><div class="panel"><h3>Workspace</h3><input id="brand" value="${esc(s.brand||g.name)}" /><input id="accent" value="${esc(s.accent||"#d6f25c")}" /><input id="idle" type="number" value="${s.idle_seconds||s.idleSeconds||90}" /><p class="hint">Idle seconds used the next time you download the script.</p><input id="week" type="number" value="${s.week_start||s.weekStart||1}" /><button class="btn primary" id="save-set">Save</button></div>
+  <div class="panel"><h3>Teams</h3><div class="row"><input id="tname" placeholder="Team" /><input id="trank" type="number" placeholder="Min rank" /><button class="btn" id="add-team">Add</button></div>${teams.teams.map(t => `<p>${esc(t.name)} · rank ${t.rank_min}+</p>`).join("")}</div></div>`;
+  $("#save-set").onclick = async () => { await api(`/api/groups/${g.id}/settings`, {method:"POST", body:{brand:$("#brand").value, accent:$("#accent").value, idleSeconds:Number($("#idle").value), weekStart:Number($("#week").value)}}); document.documentElement.style.setProperty("--accent", $("#accent").value); toast("Saved"); };
+  $("#add-team").onclick = async () => { await api(`/api/groups/${g.id}/teams`, {method:"POST", body:{name:$("#tname").value, rankMin:Number($("#trank").value||1)}}); render(); };
+}
+function openAddGroup() {
+  $("#modal-root").innerHTML = `<div class="modal-back"><form class="modal" id="gform"><h2>Add group</h2><label>Group id</label><input id="gid" placeholder="1200769" /><p class="err" id="gerr"></p><div class="row"><button class="btn primary">Fetch and add</button><button class="btn" type="button" id="gclose">Cancel</button></div></form></div>`;
+  $("#gclose").onclick = () => $("#modal-root").innerHTML = "";
+  $("#gform").onsubmit = async e => { e.preventDefault(); try { const out = await api("/api/groups", {method:"POST", body:{groupId:Number($("#gid").value)}}); state.groupId = out.group.id; localStorage.setItem("kestrel.group", state.groupId); $("#modal-root").innerHTML = ""; toast("Added "+out.group.name); await loadGroups(); render(); } catch (err) { $("#gerr").textContent = err.message; } };
+}
+async function loadGroups() { const data = await api("/api/groups"); state.groups = data.groups; if (!state.groups.some(g => g.id === state.groupId)) state.groupId = state.groups[0]?.id || 0; }
+$("#login-form").onsubmit = async e => { e.preventDefault(); $("#login-err").textContent = ""; $("#start-btn").disabled = true; try { state.challenge = await api("/api/auth/start", {method:"POST", body:{username:$("#username").value}}); $("#step-user").classList.add("hidden"); $("#step-code").classList.remove("hidden"); $("#code").textContent = state.challenge.code; $("#who-name").textContent = state.challenge.displayName; $("#who-user").textContent = "@"+state.challenge.username; $("#avatar").src = state.challenge.avatar; $("#profile-link").href = state.challenge.profileUrl; $("#login-title").textContent = "Check the bio"; } catch (err) { $("#login-err").textContent = err.message; } finally { $("#start-btn").disabled = false; } };
+$("#copy-code").onclick = () => { navigator.clipboard?.writeText(state.challenge.code); toast("Copied"); };
+$("#back-btn").onclick = () => { $("#step-code").classList.add("hidden"); $("#step-user").classList.remove("hidden"); };
+$("#verify-btn").onclick = async () => { $("#login-err").textContent = ""; try { const out = await api("/api/auth/verify", {method:"POST", body:{challengeId:state.challenge.challengeId}}); state.token = out.token; localStorage.setItem("kestrel.token", out.token); state.me = out; await loadGroups(); showApp(); } catch (err) { $("#login-err").textContent = err.message; } };
+$("#logout").onclick = async () => { await api("/api/auth/logout", {method:"POST", body:{}}).catch(()=>{}); localStorage.removeItem("kestrel.token"); state.token = ""; showLogin(); };
+$("#add-group-btn").onclick = openAddGroup;
+$("#group-switch").onchange = () => { state.groupId = Number($("#group-switch").value); localStorage.setItem("kestrel.group", state.groupId); render(); };
+$("#nav").onclick = e => { const b = e.target.closest("button"); if (!b) return; state.view = b.dataset.view; render(); };
+(async function boot() { if (!state.token) return showLogin(); try { state.me = await api("/api/me"); await loadGroups(); showApp(); } catch { localStorage.removeItem("kestrel.token"); state.token = ""; showLogin(); } })();
+</script>
+</body>
+</html>
