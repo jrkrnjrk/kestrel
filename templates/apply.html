@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>{{ name }}</title>
+<link rel="stylesheet" href="/static/dashboard.css" />
+</head>
+<body style="max-width:640px;margin:40px auto;padding:20px">
+<h1 style="font-family:Fraunces,serif">{{ name }}</h1>
+<p>{{ description }}</p>
+<form method="post" action="/apply/{{ slug }}">
+  <label>Roblox username</label>
+  <input name="username" required />
+  {% for q in questions %}
+    <label>{{ q.prompt }}</label>
+    <input name="q_{{ q.id }}" />
+  {% endfor %}
+  <button class="btn primary">Submit</button>
+</form>
+{% if notice != "" %}<p>{{ notice }}</p>{% endif %}
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% include "top.html" %}
+<div class="split">
+  <form class="panel" method="post" action="/applications">
+    <h2>New application</h2>
+    <input name="name" placeholder="Name" />
+    <input name="slug" placeholder="public slug" />
+    <textarea name="description" placeholder="Description"></textarea>
+    <label><input type="checkbox" name="quiz" value="1" /> Quiz mode</label>
+    <input name="pass_percent" type="number" value="70" />
+    <button class="btn primary">Create</button>
+    {% for f in forms %}<p><a href="/apply/{{ f.slug }}">/apply/{{ f.slug }}</a> · {{ f.name }}</p>{% endfor %}
+    <h2>Question</h2>
+    <select name="form_id">{% for f in forms %}<option value="{{ f.id }}">{{ f.name }}</option>{% endfor %}</select>
+    <input name="prompt" placeholder="Prompt" />
+    <input name="answer" placeholder="Correct answer, optional" />
+    <button class="btn" formaction="/applications/question">Add question</button>
+  </form>
+  <div class="panel">
+    <h2>Responses</h2>
+    {% for a in apps %}
+      <div class="line"><span>@{{ a.username }}</span><span class="kind">{{ a.status }} {{ a.score }}%</span><span>
+        <form method="post" action="/applications/review" style="display:inline"><input type="hidden" name="id" value="{{ a.id }}" /><input type="hidden" name="status" value="pass" /><button class="btn">Pass</button></form>
+        <form method="post" action="/applications/review" style="display:inline"><input type="hidden" name="id" value="{{ a.id }}" /><input type="hidden" name="status" value="fail" /><button class="btn">Fail</button></form>
+      </span></div>
+    {% endfor %}
+  </div>
+</div>
+{% include "bottom.html" %}

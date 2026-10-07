@@ -1,0 +1,21 @@
+{% include "top.html" %}
+<div class="split">
+  <div class="cards">
+    {% for g in groups %}
+      <article class="panel card">
+        <h3>{{ g.name }}</h3>
+        <p>{{ g.description }}</p>
+        <p class="crumb">{{ g.member_count }} members · @{{ g.owner_name }} {% if g.demo %}· sample{% endif %} {% if g.has_cloud %}· cloud linked{% endif %}</p>
+        <form method="post" action="/group/switch"><input type="hidden" name="group_id" value="{{ g.id }}" /><button class="btn primary">Open</button></form>
+      </article>
+    {% endfor %}
+  </div>
+  <form class="panel" method="post" action="/groups">
+    <h2>Add a Roblox group</h2>
+    <label>Group id</label>
+    <input name="group_id" placeholder="1200769" required />
+    <p class="err">{{ error }}</p>
+    <button class="btn primary">Fetch and add</button>
+  </form>
+</div>
+{% include "bottom.html" %}

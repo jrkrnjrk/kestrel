@@ -1,0 +1,27 @@
+{% include "top.html" %}
+<div class="split">
+  <div class="panel">
+    <h2>Open Cloud</h2>
+    <p class="crumb">This key pushes rank and exile to Roblox. Desk keys are what the game sends.</p>
+    <form method="post" action="/ranking/cloud"><input name="open_cloud_key" type="password" placeholder="Open Cloud key" /><button class="btn primary">Save key</button></form>
+    <h2>Desk keys</h2>
+    <form method="post" action="/ranking/key" class="row"><input name="name" placeholder="Name" /><button class="btn primary">Issue</button></form>
+    {% for k in keys %}<p class="mono">{{ k.kind }} · {{ k.actor }}</p>{% endfor %}
+    <p class="err">{{ error }}</p>
+  </div>
+  <div class="panel">
+    <h2>Manual rank</h2>
+    <form method="post" action="/ranking/apply">
+      <input name="user_id" placeholder="User id" />
+      <select name="role_id">{{ roles|safe }}</select>
+      <button class="btn primary">Apply</button>
+    </form>
+    <pre>POST {{ origin }}/api/v1/rank
+Authorization: Bearer kst_...
+{"userId":123,"roleId":456}
+
+POST {{ origin }}/api/v1/exile
+{"userId":123}</pre>
+  </div>
+</div>
+{% include "bottom.html" %}

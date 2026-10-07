@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ title }} · Kestrel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520&family=IBM+Plex+Mono:wght@400&family=Outfit:wght@380;560&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/dashboard.css" />
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="mark"><i></i> Kestrel</div>
+  <nav>
+    <div class="sec">Operate</div>
+    <a class="{% if page == "overview" %}on{% endif %}" href="/">Overview</a>
+    <a class="{% if page == "groups" %}on{% endif %}" href="/groups">Groups</a>
+    <a class="{% if page == "people" %}on{% endif %}" href="/people">People</a>
+    <a class="{% if page == "activity" %}on{% endif %}" href="/activity">Activity</a>
+    <a class="{% if page == "live" %}on{% endif %}" href="/live">Live desk</a>
+    <div class="sec">Record</div>
+    <a class="{% if page == "chat" %}on{% endif %}" href="/chat">Chat logs</a>
+    <a class="{% if page == "logs" %}on{% endif %}" href="/logs">All logs</a>
+    <a class="{% if page == "events" %}on{% endif %}" href="/events">Events</a>
+    <a class="{% if page == "sessions" %}on{% endif %}" href="/sessions">Sessions</a>
+    <div class="sec">HR</div>
+    <a class="{% if page == "applications" %}on{% endif %}" href="/applications">Applications</a>
+    <a class="{% if page == "punishments" %}on{% endif %}" href="/punishments">Punishments</a>
+    <a class="{% if page == "timeoff" %}on{% endif %}" href="/timeoff">Time off</a>
+    <a class="{% if page == "knowledge" %}on{% endif %}" href="/knowledge">Knowledge</a>
+    <a class="{% if page == "leaderboard" %}on{% endif %}" href="/leaderboard">Leaderboard</a>
+    <div class="sec">Integrate</div>
+    <a class="{% if page == "ranking" %}on{% endif %}" href="/ranking">Ranking API</a>
+    <a class="{% if page == "webhooks" %}on{% endif %}" href="/webhooks">Webhooks</a>
+    <a class="{% if page == "scripts" %}on{% endif %}" href="/scripts">Scripts</a>
+    <a class="{% if page == "settings" %}on{% endif %}" href="/settings">Settings</a>
+  </nav>
+  <div class="viewer">
+    {% if authed %}{{ viewer }}<br /><a href="/logout">Sign out</a>{% else %}<a href="/login">Connect Roblox</a>{% endif %}
+  </div>
+</aside>
+<main>
+<header class="top">
+  <div><div class="crumb">{{ group_name }}</div><h1>{{ title }}</h1></div>
+  <form method="post" action="/group/switch" class="row">
+    <select name="group_id">{{ group_options|safe }}</select>
+    <button class="btn">Switch</button>
+    <a class="btn" href="/groups">Add group</a>
+  </form>
+</header>
+<section class="page">
+{% if demo %}<div class="banner">Sample bureau is loaded so the desk is not empty. Connect Roblox, then add your group id. Ranking on Roblox still needs an Open Cloud key.</div>{% endif %}

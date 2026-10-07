@@ -1,0 +1,25 @@
+{% include "top.html" %}
+<div class="split">
+  <div class="panel">
+    <h2>In game</h2>
+    {% for p in online %}
+      <div class="line">
+        <span>@{{ p.username }}</span>
+        <span class="pill {{ p.status }}">{{ p.status }}</span>
+        <span>{{ p.server_id }}
+          <form method="post" action="/live/command" style="display:inline"><input type="hidden" name="kind" value="notify" /><input type="hidden" name="user_id" value="{{ p.user_id }}" /><input type="hidden" name="message" value="Staff notice" /><button class="btn">Notify</button></form>
+          <form method="post" action="/live/command" style="display:inline"><input type="hidden" name="kind" value="kick" /><input type="hidden" name="user_id" value="{{ p.user_id }}" /><input type="hidden" name="reason" value="Removed by staff" /><button class="btn">Kick</button></form>
+          <form method="post" action="/live/command" style="display:inline"><input type="hidden" name="kind" value="ban" /><input type="hidden" name="user_id" value="{{ p.user_id }}" /><input type="hidden" name="reason" value="Banned" /><button class="btn danger">Ban</button></form>
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+  <form class="panel" method="post" action="/live/shout">
+    <h2>Shout</h2>
+    <textarea name="message">{{ shout }}</textarea>
+    <button class="btn primary">Post shout</button>
+    <h2>Open tickets</h2>
+    {% for t in tickets %}<div class="line"><span>@{{ t.actor }}</span><span class="kind">{{ t.kind }}</span><span>{{ t.message }}</span></div>{% endfor %}
+  </form>
+</div>
+{% include "bottom.html" %}

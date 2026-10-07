@@ -1,0 +1,8 @@
+{% include "top.html" %}
+<div class="panel">
+  <p class="crumb">Other game scripts call _G.Kestrel.track(player, "Admin Logs", { command = ":kick name" })</p>
+  {% for e in events %}
+    <div class="line"><span>@{{ e.username }}</span><span class="kind">{{ e.event_type }}</span><span>{{ e.data_json }}</span></div>
+  {% endfor %}
+</div>
+{% include "bottom.html" %}

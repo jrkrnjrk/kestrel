@@ -1,0 +1,25 @@
+{% include "top.html" %}
+<div class="panel">
+  <h2>Weekly distribution</h2>
+  <form method="post" action="/activity/goal" class="row">
+    <input name="role_name" placeholder="Role" />
+    <input name="weekly_minutes" type="number" placeholder="Minutes" />
+    <button class="btn primary">Save quota</button>
+  </form>
+  <table>
+    <thead><tr><th>Person</th><th>Mix</th><th>Active</th><th>Idle</th><th>Typing</th><th>Quota</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>@{{ row.username }}</td>
+        <td><div class="bars"><i class="a" style="width:{{ row.active_pct }}%"></i><i class="i" style="width:{{ row.idle_pct }}%"></i><i class="t" style="width:{{ row.typing_pct }}%"></i></div></td>
+        <td>{{ row.active_min }}m</td>
+        <td>{{ row.idle_min }}m</td>
+        <td>{{ row.typing_min }}m</td>
+        <td><span class="pill {% if row.met %}on{% endif %}">{{ row.active_min }}/{{ row.goal }}m</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "bottom.html" %}

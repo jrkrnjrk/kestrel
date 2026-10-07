@@ -1,0 +1,7 @@
+{% include "top.html" %}
+<div class="panel">
+  {% for l in logs %}
+    <div class="line"><span>{{ l.kind }}</span><span class="kind">{{ l.actor }}</span><span>{{ l.message }}</span></div>
+  {% endfor %}
+</div>
+{% include "bottom.html" %}

@@ -1,0 +1,29 @@
+{% include "top.html" %}
+<div class="stats">
+  <div class="stat"><span>In game</span><strong>{{ online }}</strong><em>{{ tracked }} tracked</em></div>
+  <div class="stat"><span>Active</span><strong>{{ active }}</strong><em>idle {{ idle }}</em></div>
+  <div class="stat"><span>Typing</span><strong>{{ typing }}</strong><em>{{ messages }} messages</em></div>
+  <div class="stat"><span>Queue</span><strong>{{ tickets }}</strong><em>{{ apps }} apps · {{ offs }} time off</em></div>
+</div>
+<div class="grid">
+  <div class="panel">
+    <h2>Active minutes</h2>
+    <div class="chart">{% for bar in bars %}<span style="height:{{ bar }}%"></span>{% endfor %}</div>
+    <table>
+      <thead><tr><th>Person</th><th>Rank</th><th>Status</th><th>Active</th></tr></thead>
+      <tbody>
+      {% for p in people %}
+        <tr><td><a href="/people/{{ p.user_id }}">{{ p.display_name }}</a><br /><span class="crumb">@{{ p.username }}</span></td><td>{{ p.role_name }}</td><td><span class="pill {{ p.status }}">{{ p.status }}</span></td><td>{{ p.active_min }}m</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Latest</h2>
+    {% for l in logs %}
+      <div class="line"><span>{{ l.kind }}</span><span class="kind">{{ l.actor }}</span><span>{{ l.message }}</span></div>
+    {% endfor %}
+    <p class="crumb">Shout: {{ shout }}</p>
+  </div>
+</div>
+{% include "bottom.html" %}

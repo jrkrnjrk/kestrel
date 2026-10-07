@@ -1,0 +1,26 @@
+{% include "top.html" %}
+<div class="split">
+  <div class="panel">
+    <h2>{{ person.display_name }}</h2>
+    <p>@{{ person.username }} · {{ person.role_name }} · {{ person.department }} · birthday {{ person.birthday }}</p>
+    <p>Active {{ person.active_min }}m · idle {{ person.idle_min }}m · typing {{ person.typing_min }}m · {{ person.messages }} messages · {{ person.sessions }} sessions</p>
+    <form method="post" action="/people/{{ person.user_id }}/rank" class="row">
+      <select name="role_id">{{ roles|safe }}</select>
+      <button class="btn primary">Set rank</button>
+    </form>
+    <form method="post" action="/people/{{ person.user_id }}/exile"><button class="btn danger">Exile</button></form>
+    <form method="post" action="/people/{{ person.user_id }}/punish">
+      <label>Punishment</label>
+      <select name="kind"><option>warning</option><option>suspension</option><option>termination</option><option>ban</option></select>
+      <input name="reason" placeholder="Reason" />
+      <button class="btn danger">Issue</button>
+    </form>
+    <p class="err">{{ error }}</p>
+  </div>
+  <div class="panel">
+    <h2>Record</h2>
+    {% for n in notes %}<div class="line"><span>note</span><span class="kind">{{ n.actor }}</span><span>{{ n.message }}</span></div>{% endfor %}
+    <form method="post" action="/people/{{ person.user_id }}/note"><textarea name="body" placeholder="Staff note"></textarea><button class="btn">Save note</button></form>
+  </div>
+</div>
+{% include "bottom.html" %}

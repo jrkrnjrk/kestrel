@@ -1,0 +1,7 @@
+{% include "top.html" %}
+<div class="panel">
+  {% for p in items %}
+    <div class="line"><span>{{ p.kind }}</span><span class="kind">@{{ p.username }}</span><span>{{ p.reason }} · {{ p.actor }}</span></div>
+  {% endfor %}
+</div>
+{% include "bottom.html" %}

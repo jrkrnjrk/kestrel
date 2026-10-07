@@ -1,0 +1,14 @@
+{% include "top.html" %}
+<div class="split">
+  <form class="panel" method="post" action="/knowledge">
+    <h2>Page</h2>
+    <input name="title" placeholder="Title" />
+    <input name="department" placeholder="Department" />
+    <textarea name="body"></textarea>
+    <button class="btn primary">Save</button>
+  </form>
+  <div>
+    {% for d in docs %}<article class="panel"><h2>{{ d.title }}</h2><p class="crumb">{{ d.department }}</p><p>{{ d.body }}</p></article>{% endfor %}
+  </div>
+</div>
+{% include "bottom.html" %}

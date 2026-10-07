@@ -1,0 +1,18 @@
+{% include "top.html" %}
+<div class="split">
+  <form class="panel" method="post" action="/webhooks">
+    <h2>New webhook</h2>
+    <input name="name" placeholder="Name" />
+    <input name="url" placeholder="https://discord.com/api/webhooks/..." />
+    <input name="events" value="rank.changed,chat.message,punishment.issued,session.claimed" />
+    <button class="btn primary">Add</button>
+  </form>
+  <div class="panel">
+    {% for h in hooks %}
+      <p><b>{{ h.name }}</b><br /><span class="mono">{{ h.url }}</span><br />{{ h.events }}
+        <form method="post" action="/webhooks/test" style="display:inline"><input type="hidden" name="id" value="{{ h.id }}" /><button class="btn">Test</button></form>
+      </p>
+    {% endfor %}
+  </div>
+</div>
+{% include "bottom.html" %}

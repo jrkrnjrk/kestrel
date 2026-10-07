@@ -1,0 +1,17 @@
+{% include "top.html" %}
+<div class="panel">
+  <form method="post" action="/timeoff" class="row">
+    <input name="username" placeholder="Username" />
+    <input name="starts_on" type="date" />
+    <input name="ends_on" type="date" />
+    <input name="reason" placeholder="Reason" />
+    <button class="btn primary">Request</button>
+  </form>
+  {% for t in items %}
+    <div class="line"><span>@{{ t.username }}</span><span class="kind">{{ t.status }}</span><span>{{ t.starts_on }} → {{ t.ends_on }} {{ t.reason }}
+      <form method="post" action="/timeoff/review" style="display:inline"><input type="hidden" name="id" value="{{ t.id }}" /><input type="hidden" name="status" value="approved" /><button class="btn">Approve</button></form>
+      <form method="post" action="/timeoff/review" style="display:inline"><input type="hidden" name="id" value="{{ t.id }}" /><input type="hidden" name="status" value="denied" /><button class="btn">Deny</button></form>
+    </span></div>
+  {% endfor %}
+</div>
+{% include "bottom.html" %}

@@ -1,0 +1,11 @@
+{% include "top.html" %}
+<div class="panel">
+  <h2>Install</h2>
+  <p>Server script goes in ServerScriptService. Client script goes in StarterPlayerScripts. Turn on Allow HTTP Requests. The pair tracks active, idle, typing, focus, chat, kicks, bans, and notifies. Other admin scripts can call _G.Kestrel.track and _G.Kestrel.rank.</p>
+  <div class="row"><a class="btn primary" href="/scripts/loader.lua">Download server</a><a class="btn" href="/scripts/client.lua">Download client</a></div>
+</div>
+<div class="split">
+  <div class="panel"><h2>Server</h2><pre>{{ loader }}</pre></div>
+  <div class="panel"><h2>Client</h2><pre>{{ client }}</pre></div>
+</div>
+{% include "bottom.html" %}

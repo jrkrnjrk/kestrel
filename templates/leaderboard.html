@@ -1,0 +1,13 @@
+{% include "top.html" %}
+<div class="panel">
+  <h2>Top 50 by active minutes</h2>
+  <table>
+    <thead><tr><th>#</th><th>Person</th><th>Rank</th><th>Active</th><th>Sessions</th><th>Birthday</th></tr></thead>
+    <tbody>
+    {% for p in people %}
+      <tr><td>{{ loop.index }}</td><td>@{{ p.username }}</td><td>{{ p.role_name }}</td><td>{{ p.active_min }}m</td><td>{{ p.sessions }}</td><td>{{ p.birthday }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "bottom.html" %}

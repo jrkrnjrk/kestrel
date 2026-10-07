@@ -1,0 +1,21 @@
+{% include "top.html" %}
+<div class="panel">
+  <table>
+    <thead><tr><th>Person</th><th>Rank</th><th>Dept</th><th>Status</th><th>Active</th><th>Idle</th><th>Chat</th><th>Seen</th></tr></thead>
+    <tbody>
+    {% for p in people %}
+      <tr>
+        <td><a href="/people/{{ p.user_id }}">{{ p.display_name }}</a><br /><span class="crumb">@{{ p.username }} · {{ p.user_id }}</span></td>
+        <td>{{ p.role_name }}</td>
+        <td>{{ p.department }}</td>
+        <td><span class="pill {{ p.status }}">{{ p.status }}</span></td>
+        <td>{{ p.active_min }}m</td>
+        <td>{{ p.idle_min }}m</td>
+        <td>{{ p.messages }}</td>
+        <td>{{ p.last_seen }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "bottom.html" %}

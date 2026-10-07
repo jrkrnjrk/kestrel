@@ -1,0 +1,17 @@
+{% include "top.html" %}
+<div class="split">
+  <form class="panel" method="post" action="/settings">
+    <h2>Workspace</h2>
+    <input name="brand" value="{{ brand }}" />
+    <input name="accent" value="{{ accent }}" />
+    <input name="idle_seconds" type="number" value="{{ idle_seconds }}" />
+    <p class="crumb">Idle seconds are baked into the next script download.</p>
+    <button class="btn primary">Save</button>
+  </form>
+  <div class="panel">
+    <h2>Teams</h2>
+    <form method="post" action="/settings/team" class="row"><input name="name" placeholder="Team" /><input name="rank_min" type="number" placeholder="Min rank" /><button class="btn">Add</button></form>
+    {% for t in teams %}<p>{{ t.actor }} · rank {{ t.kind }}+</p>{% endfor %}
+  </div>
+</div>
+{% include "bottom.html" %}

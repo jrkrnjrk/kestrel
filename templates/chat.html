@@ -1,0 +1,7 @@
+{% include "top.html" %}
+<div class="panel">
+  {% for c in chat %}
+    <div class="line"><span>@{{ c.username }}</span><span class="kind">{{ c.channel }}</span><span>{{ c.message }}</span></div>
+  {% endfor %}
+</div>
+{% include "bottom.html" %}

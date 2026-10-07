@@ -1,0 +1,23 @@
+{% include "top.html" %}
+<div class="panel" style="max-width:520px">
+  <h2>Bio proof</h2>
+  <p>No password. We write a code, you paste it into the Roblox About box, and this server reads that bio back.</p>
+  {% if code == "" %}
+    <form method="post" action="/login/start">
+      <label>Username</label>
+      <input name="username" placeholder="builderman" required />
+      <p class="err">{{ error }}</p>
+      <button class="btn primary">Get code</button>
+    </form>
+  {% else %}
+    <p><b>{{ display_name }}</b> · @{{ username }}</p>
+    <p class="mono">{{ code }}</p>
+    <p><a href="{{ profile_url }}">Open Roblox profile</a></p>
+    <form method="post" action="/login/verify">
+      <input type="hidden" name="challenge_id" value="{{ challenge_id }}" />
+      <button class="btn primary">Check bio</button>
+    </form>
+    <p class="err">{{ error }}</p>
+  {% endif %}
+</div>
+{% include "bottom.html" %}

@@ -1,0 +1,22 @@
+{% include "top.html" %}
+<div class="split">
+  <div class="panel">
+    <h2>Schedule</h2>
+    <form method="post" action="/sessions">
+      <input name="title" placeholder="Title" />
+      <input name="place_id" placeholder="Place id" />
+      <input name="slots" type="number" placeholder="Slots" />
+      <button class="btn primary">Add session</button>
+    </form>
+    {% for s in shifts %}
+      <div class="line"><span>{{ s.title }}</span><span class="kind">{{ s.slots }} slots</span><span>{{ s.notes }}
+        <form method="post" action="/sessions/claim" style="display:inline"><input type="hidden" name="shift_id" value="{{ s.id }}" /><button class="btn">Claim</button></form>
+      </span></div>
+    {% endfor %}
+  </div>
+  <div class="panel">
+    <h2>Claims</h2>
+    {% for c in claims %}<div class="line"><span>@{{ c.username }}</span><span class="kind">{{ c.role_name }}</span><span>{{ c.shift_id }}</span></div>{% endfor %}
+  </div>
+</div>
+{% include "bottom.html" %}
